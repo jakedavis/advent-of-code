@@ -32,15 +32,7 @@ class ReportRepair
   end
 end
 
-values = [
-  1721,
-  979,
-  366,
-  299,
-  675,
-  1456
-]
-
+values = File.read('./report_repair_input').split("\n").map(&:to_i)
 repair = ReportRepair.new(values)
 repair.find_values
 puts repair.found
