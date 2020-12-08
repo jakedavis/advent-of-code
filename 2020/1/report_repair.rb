@@ -23,9 +23,9 @@ class ReportRepair
   # Pretty simple - return the product of two numbers whose sum is 2020. Return nil at the end is
   # required because Array#each will return the array itself, and we're using ||= above. Probably a
   # fancier way to do this.
-  def find_2020(first, arr)
-    arr.each do |v|
-      return first*v if first+v == 2020
+  def find_2020(v, arr)
+    arr.each do |u|
+      return v*u if v+u == 2020
     end
 
     return nil
