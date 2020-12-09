@@ -24,18 +24,6 @@ class Customs
       @forms.map(&:chars).reduce(&:intersection).length
     end
   end
-
-  class Form
-    attr_reader :answers
-
-    def initialize(answers)
-      @answers = answers
-    end
-
-    def score
-      @answers.length
-    end
-  end
 end
 
 c = Customs.new(File.read('./6_customs_input'))
