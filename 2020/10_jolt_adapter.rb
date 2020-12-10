@@ -7,7 +7,6 @@ class JoltAdapter
 
   def initialize(adapters)
     @adapters = adapters.sort
-    @combos   = tree_of_possibilities
   end
 
   def differences
@@ -17,36 +16,34 @@ class JoltAdapter
     diffs = base.zip(device).map do |f, l|
       l - f
     end
+  end
 
+  def absolute_difference
+    diffs = differences
     diffs.count(1) * diffs.count(3)
   end
 
-  def tree_of_possibilities
-    @adapters.map do |a|
-      { a => possible_for(a) }
-    end.reduce(&:merge)
+  def number_of_paths
+    ([0] + @adapters + [@adapters.last+3]).chunk_while do |x, y|
+      x + 1 == y
+    end.map do |chunk|
+      tribonacci(chunk.length+1)
+    end.reduce(&:*)
   end
 
-  def possible_for(k)
-    possibles = [ k+1, k+2, k+3 ]
-    possibles.select do |p|
-      @adapters.include?(p)
+  def tribonacci(of_length)
+    seq = [0, 1, 1]
+    
+    while seq.length < of_length
+      seq << (seq[-3] + seq[-2] + seq[-1])
     end
-  end
-
-  def derive_tree(k, vs)
-    if vs.empty?
-      [k+3]
-    else
-      vs.map do |v|
-        derive_tree(v, @combos[v])
-      end
-    end
+    
+    seq.last
   end
 end
 
 input = File.read('./10_jolt_adapter_input').split("\n").map(&:to_i)
 j = JoltAdapter.new(input)
 
-puts j.differences
-puts j.derive_tree(1, j.combos[1])
+puts j.absolute_difference
+puts j.number_of_paths
