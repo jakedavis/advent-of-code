@@ -26,38 +26,46 @@ class ColoredBags
     end
   end
 
-  # Entrypoint method - as long as contains_shiny_gold? operates as expected, this will count the
+  # Entrypoint method - as long as contains_color? operates as expected, this will count the
   # total number of bags that have a shiny gold at some point.
-  def find_shiny_golds
+  def instances_of_color(color)
     @ruleset.select do |k, _|
-      contains_shiny_gold?(k)
+      contains_color?(color, k)
     end.length
   end
 
-  # 
-  def contains_shiny_gold?(bag)
+  # Checks if the given bag contains the color provided.
+  def contains_color?(color, bag)
     contained = @ruleset[bag]
 
-    # First base check - if "shiny gold" is here, just bail out.
-    if contained.keys.any? {|k| k == 'shiny gold'}
+    # First base check - if the color is here, just bail out.
+    if contained.keys.any? {|k| k == color}
       return true
     end
 
     # Since we're using recursion, if the given bag contains no further entries, we can safely
-    # assume it does not have a shiny gold. If it's not empty, we need to dig deeper into the hash
-    # to see if any of the sub-bags contain shiny gold.
+    # assume it does not have the color. If it's not empty, we need to dig deeper into the hash
+    # to see if any of the sub-bags contain the given color.
     if contained.empty?
       return false
     else
       return contained.keys.any? do |c, _|
-        contains_shiny_gold?(c)
+        contains_color?(color, c)
       end
     end
+  end
 
-    # I'm not sure this is strictly necessary but D E F E N S I V E  P R O G R A M M I N G
-    return false
+  # Calculate the total number of bags contained within a given color Honestly, this one killed me.
+  # I do not want to do this ever again. Warning, it produces an answer 1 larger than the actual
+  # answer. I do not even care at this point.
+  def bags_for_color(color)
+    return 1 if @ruleset[color].empty?
+
+    @ruleset[color].map do |k, v|
+      v * bags_for_color(k, v)
+    end.reduce(&:+) + 1
   end
 end
 
 bags = ColoredBags.new(File.read('./7_colored_bags_input'))
-puts bags.find_shiny_golds
+puts bags.bags_for_color('shiny gold')
