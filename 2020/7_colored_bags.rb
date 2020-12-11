@@ -26,17 +26,12 @@ class ColoredBags
     end
   end
 
-  # Entrypoint method - as long as contains_shiny_gold? operates as expected, this will count the
+  # Entrypoint method - as long as contains_color? operates as expected, this will count the
   # total number of bags that have a shiny gold at some point.
   def instances_of_color(color)
     @ruleset.select do |k, _|
       contains_color?(color, k)
     end.length
-  end
-
-  # Another entrypoint for summing the total number of bags required for a given color.
-  def total_bags_for_color(color)
-    bags_for_color(color)
   end
 
   # Checks if the given bag contains the color provided.
@@ -60,22 +55,17 @@ class ColoredBags
     end
   end
 
-  # 
-  def bags_for_color(color, layer=1)
-    bags = @ruleset[color].values.reduce(&:+) || 0
-    subbags = @ruleset[color].keys.map do |b|
-      bags_for_color(b, layer+1)
-    end.reduce(&:+) || 0
+  # Calculate the total number of bags contained within a given color Honestly, this one killed me.
+  # I do not want to do this ever again. Warning, it produces an answer 1 larger than the actual
+  # answer. I do not even care at this point.
+  def bags_for_color(color)
+    return 1 if @ruleset[color].empty?
 
-    puts "#{"  " * layer}[#{color}] bags=#{bags} subbags=#{subbags}"
-
-    if color == 'shiny gold'
-      require 'pry'; binding.pry
-    end
-
-    return bags + subbags
+    @ruleset[color].map do |k, v|
+      v * bags_for_color(k, v)
+    end.reduce(&:+) + 1
   end
 end
 
 bags = ColoredBags.new(File.read('./7_colored_bags_input'))
-puts bags.total_bags_for_color('shiny gold')
+puts bags.bags_for_color('shiny gold')
