@@ -8,6 +8,9 @@ class SeatSelector
   def initialize(input, occupied_threshold: 4, strategy: 'adjacent')
     @current = input.split("\n").map {|r| r.split('')}
     @previous = []
+    @column_size = @current.length
+    @row_size = @current.first.length
+
     @cycles = 0
     @changes = 0
 
@@ -16,6 +19,12 @@ class SeatSelector
     @strategy = strategy
   end
 
+  # This is the entrypoint. As long as you fed in a valid map to the constructor, this will "just
+  # work". The Marshal::load line is something I did not know about Ruby: Object#dup will create a
+  # shallow copy of an object, so you still get any side effects from changing the original. You
+  # have to use this code to actually create a separate copy in memory. There might be a way to do
+  # this without that (you can "commit" a row once you're processing two rows ahead), but I don't
+  # know, this seems fine enough.
   def run
     while @current - @previous != []
       @previous = Marshal::load(Marshal.dump(@current))
@@ -44,27 +53,30 @@ class SeatSelector
     puts state.map { |r| r.join }.join("\n")
   end
 
+  # This is a recursive lookup for the first cell that isn't empty. We need to bail out if the cell
+  # we want to look at is outside of the actual size of the map. Ruby will let you use negative
+  # numbers but we actually don't want that here. Returning nil is fine because the code that calls
+  # this will specifically check for L or #.
   def look(y, x, ydelta, xdelta)
-    # This is an out-of-bounds that will wrap around - we want to avoid this. It's a Ruby quirk!
-    if y.negative? || x.negative?
-      return @previous[y-ydelta][x-xdelta]
-    end
+    return nil if y.negative? || x.negative?
+    return nil if y > @column_size || x > @row_size
 
     state = @previous.fetch(y, [])[x]
     if state == 'L' || state == '#'
       return state
-    elsif state == '.'
-      look(y+ydelta, x+xdelta, ydelta, xdelta)
     else
-      # This is an out-of-bounds I think
-      return '.'
+      return look(y+ydelta, x+xdelta, ydelta, xdelta)
     end
   end
 
+  # This is the main logic for processing one cell on a given run. It supports two strategies, which
+  # correspond to the two parts of the problem. The main thing is checking the "surrounding" cells
+  # based on the strategy, and then running that plus the current cell's value through a very small
+  # if tree to determine what its new state should be.
   def resolve_cell(y, x, state)
     surrounding = []
 
-    if @strategy == 'line of sight'
+    if @strategy == 'los'
       surrounding = [
         look(y-1, x-1, -1, -1),
         look(y, x-1, 0, -1),
@@ -89,7 +101,7 @@ class SeatSelector
 
       surrounding = indices.map do |index|
         @previous.fetch(index.first, [])[index.last]
-      end.select {|s| !s.nil?}
+      end
     else
       puts "Invalid strategy, bailing."
       exit
@@ -108,4 +120,4 @@ class SeatSelector
 end
 
 input = File.read('./11_seat_selector_input')
-SeatSelector.new(input, occupied_threshold: 5, strategy: 'line of sight').run
+SeatSelector.new(input, occupied_threshold: 5, strategy: 'los').run
