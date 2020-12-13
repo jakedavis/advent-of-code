@@ -91,5 +91,5 @@ class Navigator
   end
 end
 
-input = File.read('./12_come_sail_away_input')
+input = File.read('./12_input')
 Navigator.new(input, strategy: 'actual').sail

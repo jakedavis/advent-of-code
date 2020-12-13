@@ -107,5 +107,5 @@ class PassportScanner
   end
 end
 
-p = PassportScanner.new(File.read('./4_passport_checker_input'))
+p = PassportScanner.new(File.read('../4_input'))
 puts p.verify

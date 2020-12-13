@@ -60,6 +60,6 @@ class XmasAttack
   end
 end
 
-x = XmasAttack.new(File.read('./9_xmas_attack_input').split("\n").map(&:to_i))
+x = XmasAttack.new(File.read('../9_input').split("\n").map(&:to_i))
 puts "Invalid number is #{x.attack}"
 puts "Min/max sum is #{x.contiguous_sum}"

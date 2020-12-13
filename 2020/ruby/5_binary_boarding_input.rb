@@ -44,6 +44,6 @@ class BinaryBoarding
   end
 end
 
-b = BinaryBoarding.new(File.read('./5_binary_boarding_input').split("\n"))
+b = BinaryBoarding.new(File.read('../5_input').split("\n"))
 puts b.highest
 b.missing

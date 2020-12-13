@@ -68,12 +68,12 @@ end
 
 # This is for finding the instruction that needs to become a nop
 require 'json'; 
-debug = JSON.parse(File.read('./8_looper_debug_list'))
+debug = JSON.parse(File.read('../8_debug'))
 debug.reject do |d|
-  l = Looper.new(File.read('./8_looper_input'), debug_inst: d)
+  l = Looper.new(File.read('../8_input'), debug_inst: d)
   l.execute
 end
 
 # This is the 'normal' flow
-l = Looper.new(File.read('./8_looper_input'))
+l = Looper.new(File.read('../8_input'))
 puts l.execute

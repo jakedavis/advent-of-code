@@ -46,7 +46,7 @@ class PasswordChecker
   end
 end
 
-pc = PasswordChecker.new(File.read('./2_password_checker_input').split("\n"))
+pc = PasswordChecker.new(File.read('../2_input').split("\n"))
 pc.resolve
 
 puts pc.valid

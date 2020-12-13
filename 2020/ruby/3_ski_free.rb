@@ -71,6 +71,6 @@ steps = [
   [1, 2]
 ]
 
-t = Tobagganer.new(File.read('./3_ski_free_input'), steps)
+t = Tobagganer.new(File.read('../3_input'), steps)
 t.iterate
 puts t.multiply_results

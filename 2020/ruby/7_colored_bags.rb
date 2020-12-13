@@ -67,5 +67,5 @@ class ColoredBags
   end
 end
 
-bags = ColoredBags.new(File.read('./7_colored_bags_input'))
+bags = ColoredBags.new(File.read('../7_input'))
 puts bags.bags_for_color('shiny gold')

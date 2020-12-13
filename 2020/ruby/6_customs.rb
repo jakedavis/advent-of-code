@@ -26,5 +26,5 @@ class Customs
   end
 end
 
-c = Customs.new(File.read('./6_customs_input'))
+c = Customs.new(File.read('../6_input'))
 puts c.score

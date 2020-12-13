@@ -119,5 +119,5 @@ class SeatSelector
   end
 end
 
-input = File.read('./11_seat_selector_input')
+input = File.read('../11_input')
 SeatSelector.new(input, occupied_threshold: 5, strategy: 'los').run

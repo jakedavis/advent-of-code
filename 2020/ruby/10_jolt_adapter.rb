@@ -42,7 +42,7 @@ class JoltAdapter
   end
 end
 
-input = File.read('./10_jolt_adapter_input').split("\n").map(&:to_i)
+input = File.read('./10_input').split("\n").map(&:to_i)
 j = JoltAdapter.new(input)
 
 puts j.absolute_difference
