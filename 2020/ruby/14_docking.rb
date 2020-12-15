@@ -20,12 +20,15 @@ class Docker
       elsif cmd[0..2] == 'mem'
         addr = cmd.match(/(\d+)/)[1]
 
+        # Convert everything to 36 bits binary
+        add_binary = ("%36b" % addr.to_i).gsub(' ', '0')
+        val_binary = ("%36b" % value.to_i).gsub(' ', '0')
+
         case @version
         when 1
-          version_1_bootup(cmd, value, mask)
-
+          version_1_bootup(add_binary, val_binary, mask)
         when 2
-          version_2_bootup(cmd, value, mask)
+          version_2_bootup(add_binary, val_binary, mask)
         else
           puts "FATAL: Incompatible version #{@version}"
           exit
@@ -40,41 +43,50 @@ class Docker
   end
 
   def version_1_bootup(addr, value, mask)
-    val = ("%36b" % value.to_i).gsub(' ', '0')
     @memory[addr] = mask_value(mask, val.chars)
   end
 
   def version_2_bootup(addr, value, mask)
-    addrs = mask_addr(mask, addr)
-    addrs.each do |a|
-      @memory[a] = value
+    mask_addr(mask, addr).each do |a|
+      val = value.to_i(base=2)
+      @memory[a] = val
     end
   end
 
   def mask_addr(mask, addr)
-    value = mask.chars.map.with_index do |c, idx|
+    result = mask.chars.map.with_index do |c, idx|
       c == '0' ? addr[idx] : c
     end
 
-    addrs = []
-    # recur on value, check for X, gen addrs
+    # We need as many addresses as there are 2 to the number of X
+    occurrences = result.count {|n| n == 'X'}
+    addrs = (1..2**occurrences).map {|n| {n=>[]}}.reduce(&:merge)
 
-    # Calculate number of possibilities based on X
-    # Construct all possibles at once
-    #   At each X, half 0/half 1?
-    #   Need to count X's or something
-    #   At first X, one 0 first
-    #   At second X, two 0 first
-    #   At third X, four? 0 first
-    #   etc, so 2^X zeroes per X encountered
-    # 00000011001
-    # 01000011001
-    # 00001011001
-    # 01001011001
-    #
-    # Take numbers until X
+    occur = 0
+    result.each do |r|
+      if r == '0' || r == '1'
+        addrs.each {|_, v| v << r}
+      elsif r == 'X'
+        digit = '0'
+        iters = 2**occur
+        count = 0
+        addrs.each do |_, v|
+          v << digit
+          count += 1
+          if count == iters
+            count = 0
+            digit = digit == '0' ? '1' : '0'
+          end
+        end
 
-    addrs
+        occur += 1
+      else
+        puts "FATAL: Bad character #{r}"
+        exit
+      end
+    end
+
+    addrs.values.map(&:join).map {|a| a.to_i(base=2)}
   end
 
   def mask_value(mask, value)
