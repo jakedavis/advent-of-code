@@ -1,11 +1,4 @@
-fn open(path: &str) -> Result<String, std::io::Error> {
-    let f = std::fs::read(path)?;
-    let s = String::from_utf8(f).expect("Invalid UTF-8");
-
-    Ok(s)
-}
-
-fn parse(contents: &String) -> Result<Vec<i32>, std::num::ParseIntError> {
+fn parse_input(contents: &String) -> Result<Vec<i32>, std::num::ParseIntError> {
     let entries = contents
         .lines()
         .map(|l| l.parse().unwrap())
@@ -14,22 +7,32 @@ fn parse(contents: &String) -> Result<Vec<i32>, std::num::ParseIntError> {
     Ok(entries)
 }
 
-pub fn run() -> Result<Vec<i32>, Box<dyn std::error::Error>> {
-    let handle  = open("../1_input")?;
-    let entries = parse(&handle)?;
-
-    let mut result: Vec<i32> = vec![];
-    for i in &entries {
-        for j in &entries {
-            for k in &entries {
-                if i + j + k == 2020 {
-                    if !result.contains(&(i * j * k)) {
-                        result.push(i * j * k);
+fn find_candidates(entries: &Vec<i32>, arity: u32, sum: i32) -> Option<i32> {
+    for i in entries {
+        for j in entries {
+            if arity == 2 {
+                if i + j == sum {
+                    return Some(i * j);
+                }
+            } else if arity == 3 {
+                for k in entries {
+                    if i + j + k == sum {
+                        return Some(i * j * k);
                     }
                 }
             }
         }
     }
 
-    Ok(result)
+    None
+}
+
+pub fn part1(input: &String) -> Option<i32> {
+    let entries = parse_input(&input).unwrap();
+    find_candidates(&entries, 2, 2020)
+}
+
+pub fn part2(input: &String) -> Option<i32> {
+    let entries = parse_input(&input).unwrap();
+    find_candidates(&entries, 3, 2020)
 }
