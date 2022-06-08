@@ -26,13 +26,13 @@ fn elevation_increases(input: &Vec<u32>) -> u32 {
     ).sum()
 }
 
-fn main() {
-    let report = parse_input("../../1_input").unwrap();
+pub fn solve(file: &str) {
+    let report = parse_input(file).unwrap();
     let sum_2 = elevation_increases(&report);
 
     let report_3 = report.windows(3).map(|it| it.iter().sum()).collect();
     let sum_3 = elevation_increases(&report_3);
 
-    println!("Elevation increases (batches of 1): {sum_2}");
-    println!("Elevation increases (batches of 3): {sum_3}");
+    println!("[1.1] Elevation increases (batches of 1): {sum_2}");
+    println!("[1.2] Elevation increases (batches of 3): {sum_3}");
 }

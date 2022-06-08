@@ -139,8 +139,8 @@ fn parse_input(file: &str) -> Result<Vec<Direction>, Box<dyn std::error::Error>>
     Ok(directions)
 }
 
-fn main() {
-    let directions = parse_input("../../2_input").unwrap();
+pub fn solve(file: &str) {
+    let directions = parse_input(file).unwrap();
     let mut p1 = Submarine::new();
     let mut p2 = AimedSubmarine::new();
 
@@ -158,6 +158,6 @@ fn main() {
         };
     };
 
-    println!("Standard submarine final position: {}", p1.resolve_position());
-    println!("Aimed submarine final position: {}", p2.resolve_position());
+    println!("[2.1] Standard submarine final position: {}", p1.resolve_position());
+    println!("[2.2] Aimed submarine final position: {}", p2.resolve_position());
 }
