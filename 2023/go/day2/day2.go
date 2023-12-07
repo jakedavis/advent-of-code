@@ -4,6 +4,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/jakedavis/aoc/2023/util"
 )
 
 var (
@@ -50,7 +52,7 @@ func parseInput(path string) ([]Game, error) {
 		return games, err
 	}
 
-	for _, line := range strings.Split(string(contents), "\n") {
+	for _, line := range strings.Split(string(contents), util.Newline()) {
 		var game Game
 
 		components := strings.Split(line, ": ")

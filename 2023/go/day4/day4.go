@@ -4,6 +4,8 @@ import (
 	"math"
 	"os"
 	"strings"
+
+	"github.com/jakedavis/aoc/2023/util"
 )
 
 type Card struct {
@@ -34,7 +36,7 @@ func parseInput(path string) ([]*Card, error) {
 		return cards, err
 	}
 
-	for _, line := range strings.Split(string(contents), "\n") {
+	for _, line := range strings.Split(string(contents), util.Newline()) {
 		var card Card
 
 		parts := strings.Split(line, ": ")

@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/jakedavis/aoc/2023/util"
 )
 
 const numbers = "0123456789"
@@ -41,7 +43,7 @@ func input(path string) ([]string, error) {
 		return []string{}, err
 	}
 
-	splits := strings.Split(string(contents), "\n")
+	splits := strings.Split(string(contents), util.Newline())
 
 	return splits, nil
 }
