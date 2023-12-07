@@ -2,14 +2,16 @@ package day3
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
 )
 
 type Grid [][]string
-type Coordinate []int
+type Coordinate struct {
+	X int
+	Y int
+}
 
 // Numeric represents multiple array elements comprising a single number
 type Numeric struct {
@@ -20,7 +22,7 @@ type Numeric struct {
 }
 
 const digits = "0123456789"
-const symbols = "!@#$%^&*()-+/="
+const symbols = "/#@=$%-*&+"
 
 var (
 	adjacents = []Coordinate{
@@ -58,8 +60,8 @@ func parseInput(path string) (Grid, error) {
 func (g Grid) adjacentToSymbol(number Numeric) bool {
 	for i := 0; i < number.Length; i++ {
 		for _, coordinate := range adjacents {
-			y := number.Coordinate[0] + coordinate[0]
-			x := number.Coordinate[1] + coordinate[1]
+			y := number.Coordinate.Y + coordinate.Y
+			x := number.Coordinate.X + coordinate.X + i
 
 			if y < 0 || x < 0 {
 				continue
@@ -79,7 +81,7 @@ func (g Grid) adjacentToSymbol(number Numeric) bool {
 }
 
 func Part1() (int, error) {
-	grid, err := parseInput("../inputs/day3_p1_test")
+	grid, err := parseInput("../inputs/day3_p1")
 	if err != nil {
 		return 0, err
 	}
@@ -87,48 +89,39 @@ func Part1() (int, error) {
 	valueChan := make(chan int, len(grid)*len(grid[0]))
 
 	for y, row := range grid {
+		var skip int
+
+		selections := []int{}
 		for x, n := range row {
+			if skip > 0 {
+				skip--
+				continue
+			}
+
 			if !strings.Contains(digits, n) {
 				continue
 			}
 
-			// 1. once isDigit is true, we want to traverse the row until it's done or we hit a non-number
-			//   -> that creates a Numeric
-			coord := Coordinate{y, x}
-
+			// Traverse the row until it's done or we hit a non-number
 			var num Numeric
-			num.Coordinate = coord
-			for i := x; i < len(row)-1; i++ {
+			num.Coordinate = Coordinate{X: x, Y: y}
+			for i := x; i < len(row); i++ {
 				if !strings.Contains(digits, grid[y][i]) {
 					break
 				}
 				num.Length += 1
 			}
 
-			for i := x; i > 0; i-- {
-				if !strings.Contains(digits, grid[y][i]) {
-					break
-				}
-				num.Length -= 1
-			}
-			if num.Length < 0 {
-				num.Coordinate = Coordinate{y, num.Coordinate[1] + num.Length}
-				num.Length = int(math.Abs(float64(num.Length)))
-			}
-
-			// 2. from the numeric, we can determine all the adjacent spots
-			// 	 technically we can just look anywhere but we could ignore the other numbers in theory
-			// 3. look for any symbol in an adjacent spot
+			// Look for any symbol in an adjacent spot to any of the relevant cells
 			if !grid.adjacentToSymbol(num) {
-				// 4. if one does not exist, we throw it away
+				// If we don't find one, throw it away
 				continue
 			}
 
-			// 5. if one exists, strconv the numeric and pass off to channel
-			// TODO strconv.Atoi(coord)
+			// If there was a symbol, create a number out of the entry and add it to the sum
 			var digits []string
 			for i := 0; i < num.Length; i++ {
-				digit := grid[num.Coordinate[0]][num.Coordinate[1]+i]
+				digit := grid[num.Coordinate.Y][num.Coordinate.X+i]
 				digits = append(digits, digit)
 			}
 			value, err := strconv.Atoi(strings.Join(digits, ""))
@@ -136,11 +129,14 @@ func Part1() (int, error) {
 				return 0, err
 			}
 
-			fmt.Printf("candidate: %v -> %d\n", num, value)
-
+			//fmt.Printf("%.3v %d -> %.3d\n", num.Coordinate, num.Length, value)
 			valueChan <- value
-			// 6. optimally, jump the x to the end of the number+1 index
+			selections = append(selections, value)
+
+			// This allows us to skip the numbers we've already seen
+			skip = num.Length
 		}
+		fmt.Printf("[%.3d] %v\n", y, selections)
 	}
 
 	close(valueChan)
@@ -154,5 +150,52 @@ func Part1() (int, error) {
 }
 
 func Part2() (int, error) {
-	return 0, nil
+	grid, err := parseInput("../inputs/day3_p1")
+	if err != nil {
+		return 0, err
+	}
+
+	valueChan := make(chan int, len(grid)*len(grid[0]))
+
+	for y, row := range grid {
+		for x, n := range row {
+			if n != "*" {
+				continue
+			}
+
+			ratio := 1
+			adjacentNumbers := func(coord Coordinate) []int {
+				var nums []int
+				var numeric Numeric
+
+				var digits []string
+				for i := 0; i < numeric.Length; i++ {
+					digit := grid[numeric.Coordinate.Y][numeric.Coordinate.X+i]
+					digits = append(digits, digit)
+				}
+				num, err := strconv.Atoi(strings.Join(digits, ""))
+				if err != nil {
+					panic(err)
+				}
+				nums = append(nums, num)
+
+				return nums
+			}
+
+			for _, adjacent := range adjacentNumbers(Coordinate{X: x, Y: y}) {
+				ratio *= adjacent
+			}
+
+			valueChan <- ratio
+		}
+	}
+
+	close(valueChan)
+
+	var sum int
+	for msg := range valueChan {
+		sum += msg
+	}
+
+	return sum, nil
 }
